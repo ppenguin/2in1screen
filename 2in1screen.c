@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define DATA_SIZE 256
-#define N_STATE 2
+#define N_STATE 4
 char basedir[DATA_SIZE];
 char *basedir_end = NULL;
 char content[DATA_SIZE];
@@ -56,9 +56,11 @@ FILE* bdopen(char const *fname, char leave_open){
 }
 
 void rotate_screen(){
+	printf("rotating screen: %s\n", ROT[current_state]);
 	sprintf(command, "xrandr -o %s", ROT[current_state]);
 	system(command);
-	sprintf(command, "xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %s", "Wacom HID 4846 Finger", COOR[current_state]);
+	sprintf(command, "xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %s", "pointer:ELAN2514:00 04F3:29F5", COOR[current_state]);
+	sprintf(command, "xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %s", "pointer:ELAN2514:00 04F3:29F5 Pen (0)", COOR[current_state]);
 	system(command);
 }
 
