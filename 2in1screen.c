@@ -60,6 +60,7 @@ void rotate_screen(){
 	sprintf(command, "xrandr -o %s", ROT[current_state]);
 	system(command);
 	sprintf(command, "xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %s", "pointer:ELAN2514:00 04F3:29F5", COOR[current_state]);
+	system(command);
 	sprintf(command, "xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %s", "pointer:ELAN2514:00 04F3:29F5 Pen (0)", COOR[current_state]);
 	system(command);
 }
