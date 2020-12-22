@@ -43,19 +43,19 @@ int current_state = 0;
 int rotation_changed(){
 	int state = 0;
 
-	printf("check rotation (current_state==%d): accel_x==%2.2f\taccel_y==%2.2f\taccel_z==%2.2f\n", current_state, accel_x, accel_y, accel_z);
+	// printf("check rotation (current_state==%d): accel_x==%2.2f\taccel_y==%2.2f\taccel_z==%2.2f\n", current_state, accel_x, accel_y, accel_z);
 
 	if(abs(accel_z) > abs(accel_max - accel_th)) {
-		printf("Ignoring rotation change because screen almost flat\n");
+		// printf("Ignoring rotation change because screen almost flat\n");
 		return 0; // don't change because screen flat
 	}
 
 	if(abs(accel_x) < abs(accel_y)) { // landscape
 		state = (accel_y < 0.0) ? 0 : 1;
-		printf("landscape: new state==%d\n", state);
+		// printf("landscape: new state==%d\n", state);
 	} else { // portrait
 		state = (accel_x < 0.0) ? 3 : 2;
-		printf("portrait: new state==%d\n", state);
+		// printf("portrait: new state==%d\n", state);
 	}
 
 	if(current_state!=state){
@@ -80,7 +80,7 @@ FILE* bdopen(char const *fname, char leave_open){
 }
 
 void rotate_screen(){
-	printf("rotating screen: %s\n", ROT[current_state]);
+	// printf("rotating screen: %s\n", ROT[current_state]);
 	sprintf(command, "xrandr -o %s", ROT[current_state]);
 	system(command);
 	sprintf(command, "xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %s", "pointer:ELAN2514:00 04F3:29F5", COOR[current_state]);
