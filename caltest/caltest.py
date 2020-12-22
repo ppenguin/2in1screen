@@ -2,13 +2,10 @@
 
 '''
 Some exemplary values for hp spectre x360 convertible
-- screen flat: (0,0,-70)
-- screen straight (landscape) (4,-70,-7)
-- screen portrait left (-70,-6,-4)
-- screen portrait rigth (70, 5 -8)
-
-In other words, the values are degree-like but not quite.
-Choosing gscale=9.0 seems to be closer to "reality"
+- screen flat: (0,0,-10)
+- screen straight (landscape) (0.5,-9.4,-1.5)
+- screen portrait left (-9.7,-0.4,-1.2)
+- screen portrait right (9.5, 0.3 -0.5)
 '''
 
 
