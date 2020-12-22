@@ -1,12 +1,18 @@
 // gcc -O2 -o 2in1screen 2in1screen.c
 
+/*
+	Modified by ppenguin:
+	- removed number of states == 2 option
+	- changed rotation detection algorithm to be more suitable for handheld/tabletop usage
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
 #define DATA_SIZE 256
-#define N_STATE 4
+
 char basedir[DATA_SIZE];
 char *basedir_end = NULL;
 char content[DATA_SIZE];
@@ -17,22 +23,40 @@ char *COOR[]  = {"1 0 0 0 1 0 0 0 1",	"-1 0 1 0 -1 1 0 0 1", 	"0 -1 1 1 0 0 0 0 
 // char *TOUCH[] = {"enable", 				"disable", 				"disable", 				"disable"};
 
 double accel_y = 0.0,
-#if N_STATE == 4
 	   accel_x = 0.0,
-#endif
-	   accel_g = 7.0;
+	   accel_z = 0.0,
+	   accel_th = 1.5,
+	   accel_max = 10.0; // threshold offset value [m/s^2]
 
 int current_state = 0;
+
+/*  the original algorithm isn't practical for "in-hand tablet usage",
+	for that we would need to be able to define a rotation threshold with
+	a kind of angle offset.
+
+	Or, better: the orientation *never changes* if display close to horiontal
+	(table top), say z <=-9.0 
+	Further rules:
+	abs(x) < abs(y) ==> landscape, else portrait.
+*/
 
 int rotation_changed(){
 	int state = 0;
 
-	if(accel_y < -accel_g) state = 0;
-	else if(accel_y > accel_g) state = 1;
-#if N_STATE == 4
-	else if(accel_x > accel_g) state = 2;
-	else if(accel_x < -accel_g) state = 3;
-#endif
+	printf("check rotation (current_state==%d): accel_x==%2.2f\taccel_y==%2.2f\taccel_z==%2.2f\n", current_state, accel_x, accel_y, accel_z);
+
+	if(abs(accel_z) > abs(accel_max - accel_th)) {
+		printf("Ignoring rotation change because screen almost flat\n");
+		return 0; // don't change because screen flat
+	}
+
+	if(abs(accel_x) < abs(accel_y)) { // landscape
+		state = (accel_y < 0.0) ? 0 : 1;
+		printf("landscape: new state==%d\n", state);
+	} else { // portrait
+		state = (accel_x < 0.0) ? 3 : 2;
+		printf("portrait: new state==%d\n", state);
+	}
 
 	if(current_state!=state){
 		current_state = state;
@@ -87,19 +111,22 @@ int main(int argc, char const *argv[]) {
 	double scale = atof(content);
 
 	FILE *dev_accel_y = bdopen("in_accel_y_raw", 1);
-#if N_STATE == 4
 	FILE *dev_accel_x = bdopen("in_accel_x_raw", 1);
-#endif
+	FILE *dev_accel_z = bdopen("in_accel_z_raw", 1);
 
 	while(1){
 		fseek(dev_accel_y, 0, SEEK_SET);
 		fgets(content, DATA_SIZE, dev_accel_y);
 		accel_y = atof(content) * scale;
-#if N_STATE == 4
+
 		fseek(dev_accel_x, 0, SEEK_SET);
 		fgets(content, DATA_SIZE, dev_accel_x);
 		accel_x = atof(content) * scale;
-#endif
+
+		fseek(dev_accel_z, 0, SEEK_SET);
+		fgets(content, DATA_SIZE, dev_accel_z);
+		accel_z = atof(content) * scale;
+
 		if(rotation_changed())
 			rotate_screen();
 		sleep(2);
